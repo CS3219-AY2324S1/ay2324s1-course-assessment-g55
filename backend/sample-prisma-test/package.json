@@ -1,0 +1,20 @@
+{
+  "name": "sample-prisma-test",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ts-node ./script.ts",
+    "generate": "prisma generate",
+    "deploy": "prisma migrate deploy",
+    "migrate": "prisma migrate dev",
+    "reset": "prisma migrate reset"
+  },
+  "dependencies": {
+    "@prisma/client": "5.3.0",
+    "@types/node": "18.17.15"
+  },
+  "devDependencies": {
+    "prisma": "5.3.0",
+    "ts-node": "10.9.1",
+    "typescript": "5.2.2"
+  }
+}
