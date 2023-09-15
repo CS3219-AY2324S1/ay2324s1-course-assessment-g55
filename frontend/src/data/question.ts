@@ -1,5 +1,5 @@
 export interface Question {
-  id: number;
+  id: string;
   title: string;
   description: string;
   categories: Array<string>;
@@ -8,7 +8,7 @@ export interface Question {
 
 export const questions: Array<Question> = [
   { 
-    id: 1,
+    id: "1",
     title: "Reverse a string",
     description: `Write a function that reverses a string. The input string is given as an array
 
