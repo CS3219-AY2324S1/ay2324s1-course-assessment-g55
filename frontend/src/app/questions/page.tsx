@@ -2,10 +2,19 @@
 
 import { Question, questions as initialQuestions, questions } from "@/data/question";
 import { deleteFromArray } from "@/data/utils";
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 export default function QuestionsPage() {
-  const [questions, setQuestions] = useState(initialQuestions);
+  const [questions, setQuestions] = useState<Question[]>([]);
+
+  useEffect(() => {
+    setQuestions(getQuestions());
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem("questions", JSON.stringify(questions))
+  }, [questions]);
+
   const toReturn = questions.map((question, idx) => QuestionItem({ idx, question, setQuestions }));
   return (<main className="flex min-h-screen flex-col items-center p-24">
     <QuestionForm questions={questions} setQuestions={setQuestions} />
@@ -28,6 +37,18 @@ function QuestionItem(props: {
     <button className="btn btn-blue" type="button" onClick={() => setQuestions(deleteFromArray(questions, idx))}>delete</button>
   </>;
 }
+
+function getQuestions() {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return initialQuestions;
+  }
+  const cookieQuestions = window.localStorage.getItem("questions");
+  if (cookieQuestions == null) {
+    return initialQuestions;
+  }
+  return JSON.parse(cookieQuestions);
+}
+
 function QuestionForm(props: {
   questions: Question[];
   setQuestions: Dispatch<SetStateAction<Question[]>>;
@@ -38,7 +59,7 @@ function QuestionForm(props: {
     title: "",
     description: "",
     categories: [],
-    complexity: "",
+    complexity: "Easy",
   }
   const { questions, setQuestions } = props;
   const [question, setQuestion] = useState(tmp);
@@ -85,7 +106,7 @@ function QuestionForm(props: {
     </div>
     <div className="flex">
       <div style={{ marginRight: "2rem" }}>Difficulty: </div>
-      <select name="complexity" onChange={e => setQuestion({ ...question, complexity: e.currentTarget.value })}>
+      <select name="complexity" value={question.complexity} onChange={e => setQuestion({ ...question, complexity: e.currentTarget.value })}>
         <option value="Easy">Easy</option>
         <option value="Medium">Medium</option>
         <option value="Hard">Hard</option>
