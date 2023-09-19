@@ -13,12 +13,14 @@ function QuestionRow(props: {
     <Tr>
       <Td>
         <Button onClick={onOpen}>
-          {`${question.id}. ${question.title}`}
+          {question.title}
         </Button>
       </Td>
       <Td>{question.complexity}</Td>
       <Td>
-        <Button size='sm' leftIcon={<DeleteIcon />} color='red' onClick={() => deleteQuestion(rowNum)} />
+        <Button size='sm' color='red' onClick={() => deleteQuestion(rowNum)} >
+          <DeleteIcon/>
+        </Button>
       </Td>
     </Tr>
     ;
