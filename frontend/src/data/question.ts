@@ -1,4 +1,4 @@
-export interface Question {
+export interface QuestionType {
   id: string;
   title: string;
   description: string;
@@ -6,7 +6,7 @@ export interface Question {
   complexity: string;
 }
 
-export const questions: Array<Question> = [
+export const questions: Array<QuestionType> = [
   { 
     id: "1",
     title: "Reverse a string",

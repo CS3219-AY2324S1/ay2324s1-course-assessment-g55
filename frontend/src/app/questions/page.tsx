@@ -1,11 +1,13 @@
 'use client'
 
-import { Question, questions as initialQuestions, questions } from "@/data/question";
+import { QuestionType, questions as initialQuestions, questions } from "@/data/question";
 import { deleteFromArray } from "@/data/utils";
+import { Box, Button, Flex, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Table, TableContainer, Tag, TagCloseButton, TagLabel, Tbody, Td, Th, Thead, Tr, useDisclosure } from "@chakra-ui/react";
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { DeleteIcon } from '@chakra-ui/icons'
 
 export default function QuestionsPage() {
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questions, setQuestions] = useState<QuestionType[]>([]);
 
   useEffect(() => {
     setQuestions(getQuestions());
@@ -15,27 +17,98 @@ export default function QuestionsPage() {
     window.localStorage.setItem("questions", JSON.stringify(questions))
   }, [questions]);
 
-  const toReturn = questions.map((question, idx) => QuestionItem({ idx, question, setQuestions }));
-  return (<main className="flex min-h-screen flex-col items-center p-24">
-    <QuestionForm questions={questions} setQuestions={setQuestions} />
-    {toReturn}
+  return (<main>
+    <Flex direction="column" align="center">
+      <QuestionForm questions={questions} setQuestions={setQuestions} />
+      <Box w='80%'>
+        <QuestionList questions={questions} setQuestions={setQuestions} />
+      </Box>
+    </Flex>
   </main>);
 }
 
+function QuestionRow(props: {
+  rowNum: number;
+  question: QuestionType;
+  setQuestions: Dispatch<SetStateAction<QuestionType[]>>;
+}) {
+  const { rowNum, question, setQuestions } = props;
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const row =
+    <Tr>
+      <Td>
+        <Button onClick={onOpen}>
+          {`${question.id}. ${question.title}`}
+        </Button>
+      </Td>
+      <Td>{question.complexity}</Td>
+      <Td>
+        <Button size='sm' leftIcon={<DeleteIcon />} color='red' onClick={() => setQuestions(deleteFromArray(questions, rowNum))} />
+      </Td>
+    </Tr>
+    ;
+  return <>
+    {row}
+    <QuestionItem question={question} isOpen={isOpen} onClose={onClose} />
+  </>;
+}
+function QuestionList(props: {
+  questions: QuestionType[];
+  setQuestions: Dispatch<SetStateAction<QuestionType[]>>;
+}) {
+  const { questions, setQuestions } = props;
+
+  return <TableContainer>
+    <Table variant='simple' size='lg'>
+      <Thead>
+        <Tr>
+          <Th>
+            Title
+          </Th>
+          <Th width='40px'>
+            Complexity
+          </Th>
+          <Th width='20px'>
+            Actions
+          </Th>
+        </Tr>
+      </Thead>
+      <Tbody>
+        {questions.map((question, rowNum) =>
+          <QuestionRow key={`question-${rowNum}`} question={question} rowNum={rowNum} setQuestions={setQuestions} />)}
+      </Tbody>
+    </Table>
+  </TableContainer>
+}
+
 function QuestionItem(props: {
-  idx: number;
-  question: Question;
-  setQuestions: Dispatch<SetStateAction<Question[]>>;
+  question: QuestionType;
+  isOpen: boolean;
+  onClose: () => void;
 }
 ) {
-  const { idx, question, setQuestions } = props;
-  return <>
-    <div>{question.id}. {question.title} </div>
-    <div>Difficulty: {question.complexity}</div>
-    <div>{question.description}</div>
-    <div>Categories: {question.categories.reduce((acc, c) => acc + ", " + c, "")} </div>
-    <button className="btn btn-blue" type="button" onClick={() => setQuestions(deleteFromArray(questions, idx))}>delete</button>
-  </>;
+  const { question, isOpen, onClose } = props;
+  return (
+    <>
+      <Modal size="xl" isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader> {question.id}. {question.title} </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <div> Difficulty: {question.complexity} </div>
+
+            <div className="whitespace-pre-line py-3">
+              <h2>Description</h2>
+              <p>{question.description}</p>
+            </div>
+            <div> {question.categories.length == 0 ? "No categories!" :
+              `Categories: ${question.categories.reduce((acc, c) => acc + ", " + c)}`}
+            </div>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+    </>)
 }
 
 function getQuestions() {
@@ -50,11 +123,11 @@ function getQuestions() {
 }
 
 function QuestionForm(props: {
-  questions: Question[];
-  setQuestions: Dispatch<SetStateAction<Question[]>>;
+  questions: QuestionType[];
+  setQuestions: Dispatch<SetStateAction<QuestionType[]>>;
 }
 ) {
-  const tmp: Question = {
+  const tmp: QuestionType = {
     id: "",
     title: "",
     description: "",
@@ -125,9 +198,10 @@ function CategoryLabel(props: {
 }
 ) {
   const { idx, name, changeCategories } = props;
-  return <div className="flex" style={{ border: "1px solid black", marginRight: "5px" }}>
-    <div style={{ marginRight: "2px" }}>{name}</div>
-    <button type="button" className="btn-blue" onClick={() => changeCategories(idx)}> x</button>
+  return <div className="flex" >
+    <Tag className="mr-1" size="sm" borderRadius='full' colorScheme='blue' >
+      <TagLabel>{name}</TagLabel>
+      <TagCloseButton onClick={() => changeCategories(idx)} />
+    </Tag>
   </div >
 }
-
