@@ -16,16 +16,19 @@ export function QuestionForm(props: {
   const { handleSubmit, register, formState: { errors }, setError, reset } = useForm();
 
   const addCategory = () => {
-    if (category.trim().length == 0) {
+    const tmp = category;
+    setCategory("");
+    if (tmp.trim().length == 0) {
       setIsCategoryError(true);
       return
     }
-    setCategory("");
     setIsCategoryError(false);
     if (categories.includes(category)) {
       return
     }
+    setCategories([...categories, tmp]);
   };
+
   const changeCategories = (idx: number) => {
     const newCategories = deleteFromArray(categories, idx);
     setCategories(newCategories);
@@ -41,17 +44,13 @@ export function QuestionForm(props: {
       categories,
     };
 
-    setCategory("");
-    setCategories([]);
-    reset();
-
-    if (questions.some(({id}) => (id == question.id))) {
+    if (questions.some(({id}) => (id === question.id))) {
       setError('id', {
         type: "manual",
         message: "ID should be unique!"})
       return;
     }
-    if (questions.some(({title}) => (title == question.title))) {
+    if (questions.some(({title}) => (title === question.title))) {
       setError('title', {
         type: "manual",
         message: "Title should be unique!"})
@@ -59,6 +58,9 @@ export function QuestionForm(props: {
     }
 
     setQuestions([...questions, question]);
+    setCategory("");
+    setCategories([]);
+    reset();
   }
 
   return <form onSubmit={handleSubmit(onSubmit)}>
