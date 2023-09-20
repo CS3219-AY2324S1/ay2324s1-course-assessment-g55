@@ -1,0 +1,52 @@
+package main
+
+import (
+	"net/http"
+	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/render"
+)
+
+func main() {
+
+	questionsMap := make(map[QuestionId]Question)
+	questionsMap["1"] = Question{
+		Title:       "hello",
+		Description: "world",
+		Complexity:  Easy,
+		Categories:  []string{"fun"},
+	}
+	store := NewQuestionStore(questionsMap)
+	service := NewQuestionService(store)
+	server := NewApiServer(service)
+
+	r := chi.NewRouter()
+
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(render.SetContentType(render.ContentTypeJSON))
+
+	// Set a timeout value on the request context (ctx), that will signal
+	// through ctx.Done() that the request has timed out and further
+	// processing should be stopped.
+	r.Use(middleware.Timeout(60 * time.Second))
+
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("hello world"))
+	})
+	r.Route("/questions", func(r chi.Router) {
+		r.Get("/", server.ListQuestions) // GET /questions
+		r.Route("/{questionId}", func(r chi.Router) {
+			r.Use(server.QuestionCtx)
+			r.Get("/", server.GetQuestion)
+			r.Put("/", server.UpdateQuestion)
+			r.Delete("/", server.DeleteQuestion)
+		})
+	})
+
+	http.ListenAndServe(":3333", r)
+}
