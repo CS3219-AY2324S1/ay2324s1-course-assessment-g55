@@ -1,0 +1,5 @@
+CREATE TABLE users (
+    userId PRIMARY KEY,
+    username VARCHAR(256) NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+);
