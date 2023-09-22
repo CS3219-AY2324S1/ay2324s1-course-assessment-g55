@@ -2,23 +2,35 @@ package main
 
 import (
 	"net/http"
+	"os"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	"github.com/guregu/dynamo"
 )
+
+type AwsQuestion struct {
+	QuestionId  int    `dynamo:"questionId"`
+	Description string `dynamo:"description"`
+}
 
 func main() {
 
-	questionsMap := make(map[QuestionId]Question)
-	questionsMap["1"] = Question{
-		Title:       "hello",
-		Description: "world",
-		Complexity:  Easy,
-		Categories:  []string{"fun"},
-	}
-	store := NewQuestionStore(questionsMap)
+	access_key := os.Getenv("AWS_PREPPAL_PUBLIC_KEY")
+	secret_key := os.Getenv("AWS_PREPPAL_PRIVATE_KEY")
+	session := session.Must(session.NewSession())
+	db := dynamo.New(session, &aws.Config{
+		Region:      aws.String("ap-southeast-1"),
+		Credentials: credentials.NewStaticCredentials(access_key, secret_key, ""),
+	})
+	table := db.Table("questionDetails")
+
+	store := NewQuestionStore(table)
 	service := NewQuestionService(store)
 	server := NewApiServer(service)
 

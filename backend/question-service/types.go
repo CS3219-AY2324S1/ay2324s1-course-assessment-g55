@@ -12,9 +12,9 @@ type IndexedQuestion struct {
 	Question Question   `json:"question"`
 }
 
-type QuestionId string
+type QuestionId uint64
 
-type Category int64
+type Category int
 
 const (
 	Easy   Category = 0

@@ -2,10 +2,8 @@ package main
 
 import (
 	"context"
-	"errors"
-	"sort"
 
-	"golang.org/x/exp/maps"
+	"github.com/guregu/dynamo"
 )
 
 type Service interface {
@@ -47,7 +45,6 @@ func (s *QuestionService) DeleteQuestion(ctx context.Context, questionId Questio
 }
 
 type store interface {
-	contains(QuestionId) (bool, error)
 	createQuestion(QuestionId, Question) error
 	getQuestion(QuestionId) (IndexedQuestion, error)
 	getQuestions() ([]IndexedQuestion, error)
@@ -56,69 +53,56 @@ type store interface {
 }
 
 type questionStore struct {
-	questions map[QuestionId]Question
+	questions dynamo.Table
 }
 
-func NewQuestionStore(questions map[QuestionId]Question) store {
+func NewQuestionStore(questions dynamo.Table) store {
 	return &questionStore{
 		questions: questions,
 	}
 }
 
-func (qs *questionStore) contains(questionId QuestionId) (bool, error) {
-	_, ok := qs.questions[questionId]
-	return ok, nil
-}
-
 func (qs *questionStore) createQuestion(questionId QuestionId, question Question) error {
-	if isExist, err := qs.contains(questionId); err != nil {
+	err := qs.questions.Put().If("attribute_not_exists(questionId)").Run()
+	if err != nil {
 		return err
-	} else if isExist {
-		return errors.New("Question ID not unique")
 	}
-	qs.questions[questionId] = question
 	return nil
 }
 
 func (qs *questionStore) getQuestion(questionId QuestionId) (IndexedQuestion, error) {
-	if isExist, err := qs.contains(questionId); err != nil {
+	question := Question{}
+	err := qs.questions.Get().One()
+	if err != nil {
 		return IndexedQuestion{}, err
-	} else if !isExist {
-		return IndexedQuestion{}, errors.New("Question does not exist")
 	}
-	question := qs.questions[questionId]
 	return IndexedQuestion{questionId, question}, nil
 }
 
 func (qs *questionStore) getQuestions() ([]IndexedQuestion, error) {
-	questionIds := maps.Keys(qs.questions)
-	sort.Slice(questionIds, func(i, j int) bool {
-		return questionIds[i] < questionIds[j]
-	})
 
-	res := make([]IndexedQuestion, 0, len(questionIds))
-	for _, id := range questionIds {
-		res = append(res, IndexedQuestion{id, qs.questions[id]})
+	var res []IndexedQuestion
+	err := qs.questions.Scan().All()
+
+	if err != nil {
+		return []IndexedQuestion{}, err
 	}
+
 	return res, nil
 }
 
 func (qs *questionStore) updateQuestion(questionId QuestionId, question Question) error {
-	if isExist, err := qs.contains(questionId); err != nil {
+	err := qs.questions.Put().If("attribute_exists(questionId)").Run()
+	if err != nil {
 		return err
-	} else if !isExist {
-		return errors.New("Question does not exist")
 	}
-	qs.questions[questionId] = question
 	return nil
 }
 
 func (qs *questionStore) deleteQuestion(questionId QuestionId) error {
-	if isExist, err := qs.contains(questionId); err != nil {
+	err := qs.questions.Delete().Run()
+	if err != nil {
 		return err
-	} else if !isExist {
-		return errors.New("Question does not exist")
 	}
-	delete(qs.questions, questionId)
 	return nil
 }
