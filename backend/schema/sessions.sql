@@ -1,7 +1,11 @@
+CREATE TYPE rating AS ENUM ('good', 'bad');
+
 CREATE TABLE sessions (
     sessionId SERIAL PRIMARY KEY,
     user1Id VARCHAR(256) NOT NULL,
     user2Id VARCHAR(256) NOT NULL,
+    user1Rating rating,
+    user2Rating rating,
     codeLanguage VARCHAR(256) NOT NULL,
     startedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     endedAt TIMESTAMP,

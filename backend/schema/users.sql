@@ -1,5 +1,6 @@
 CREATE TABLE users (
     userId PRIMARY KEY,
     username VARCHAR(256) NOT NULL,
+    score INT NOT NULL DEFAULT 0,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 );
