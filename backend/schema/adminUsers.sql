@@ -1,4 +1,4 @@
 CREATE TABLE adminUsers (
-    userId PRIMARY KEY,
+    userid INT PRIMARY KEY,
     FOREIGN KEY (userId) REFERENCES users(userId)
 );

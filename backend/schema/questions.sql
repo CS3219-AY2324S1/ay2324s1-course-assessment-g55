@@ -5,6 +5,6 @@ CREATE TABLE questions (
     questionTitle VARCHAR(256) NOT NULL UNIQUE,
     categories VARCHAR(256)[] NOT NULL,
     difficulty difficulties NOT NULL,
-    attempts INT,
+    attempts INT DEFAULT 0,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
