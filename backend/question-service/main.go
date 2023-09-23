@@ -1,6 +1,11 @@
 package main
 
 import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/jackc/pgx/v5"
 	"net/http"
 	"os"
 	"time"
@@ -14,23 +19,29 @@ import (
 	"github.com/guregu/dynamo"
 )
 
-type AwsQuestion struct {
-	QuestionId  int    `dynamo:"questionId"`
-	Description string `dynamo:"description"`
+var qua = map[string]string{
+	"get":    "select * from questions where questionId=$1",
+	"getAll": "select * from questions",
 }
 
 func main() {
 
-	access_key := os.Getenv("AWS_PREPPAL_PUBLIC_KEY")
-	secret_key := os.Getenv("AWS_PREPPAL_PRIVATE_KEY")
+	accessKey := os.Getenv("AWS_PREPPAL_PUBLIC_KEY")
+	secretKey := os.Getenv("AWS_PREPPAL_PRIVATE_KEY")
 	session := session.Must(session.NewSession())
 	db := dynamo.New(session, &aws.Config{
 		Region:      aws.String("ap-southeast-1"),
-		Credentials: credentials.NewStaticCredentials(access_key, secret_key, ""),
+		Credentials: credentials.NewStaticCredentials(accessKey, secretKey, ""),
 	})
-	table := db.Table("questionDetails")
 
-	store := NewQuestionStore(table)
+	descriptionTable := db.Table("questionDetails")
+
+	pgxDb, err := pgx.Connect(context.Background(), os.Getenv("POSTGRES_URL"))
+	if err != nil {
+		log.Fatal(fmt.Sprintf("Unable to connect to database: %v\n", err))
+	}
+
+	store := NewQuestionStore(descriptionTable, pgxDb)
 	service := NewQuestionService(store)
 	server := NewApiServer(service)
 
@@ -51,6 +62,7 @@ func main() {
 		w.Write([]byte("hello world"))
 	})
 	r.Route("/questions", func(r chi.Router) {
+		r.Post("/", server.CreateQuestion)
 		r.Get("/", server.ListQuestions) // GET /questions
 		r.Route("/{questionId}", func(r chi.Router) {
 			r.Use(server.QuestionCtx)
@@ -60,5 +72,9 @@ func main() {
 		})
 	})
 
-	http.ListenAndServe(":3333", r)
+	err = http.ListenAndServe(":3333", r)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }

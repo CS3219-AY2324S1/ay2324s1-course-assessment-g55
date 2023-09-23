@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
@@ -21,7 +22,12 @@ func NewApiServer(service Service) *ApiServer {
 
 func (api *ApiServer) QuestionCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		questionId := QuestionId(chi.URLParam(r, "questionId"))
+		idInUrl, err := strconv.Atoi(chi.URLParam(r, "questionId"))
+		if err != nil {
+			render.Render(w, r, ErrNotFound)
+			return
+		}
+		questionId := QuestionId(idInUrl)
 		ctx := context.WithValue(r.Context(), "questionId", questionId)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
@@ -61,14 +67,22 @@ func (api *ApiServer) CreateQuestion(w http.ResponseWriter, r *http.Request) {
 		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-	questionId, ok := r.Context().Value("questionId").(QuestionId)
-	if !ok {
-		render.Render(w, r, ErrRender(errors.New("Unexpected error")))
+	question := Question{
+		Information: *data.QuestionInformation,
+		Details:     data.QuestionDetails,
+	}
+
+	questionId, err := api.service.CreateQuestion(r.Context(), question)
+	if err != nil {
+		render.Render(w, r, ErrRender(err))
 		return
 	}
-	question := data.Question
-	api.service.CreateQuestion(r.Context(), questionId, *question)
+	question.Id = questionId
 	render.Status(r, http.StatusCreated)
+	if err := render.Render(w, r, &question); err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
 }
 
 func (api *ApiServer) UpdateQuestion(w http.ResponseWriter, r *http.Request) {
@@ -82,27 +96,44 @@ func (api *ApiServer) UpdateQuestion(w http.ResponseWriter, r *http.Request) {
 		render.Render(w, r, ErrRender(errors.New("Unexpected error")))
 		return
 	}
-	api.service.UpdateQuestion(r.Context(), questionId, *data.Question)
+	question := Question{
+		Id:          questionId,
+		Information: *data.QuestionInformation,
+		Details:     data.QuestionDetails,
+	}
+	if err := api.service.UpdateQuestion(r.Context(), question); err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
 
 	render.Status(r, http.StatusOK)
+	if err := render.Render(w, r, &question); err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
 }
 
 func (api *ApiServer) DeleteQuestion(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	questionId, ok := ctx.Value("questionId").(*QuestionId)
+	questionId, ok := ctx.Value("questionId").(QuestionId)
+	println(questionId)
 
 	if !ok {
 		render.Render(w, r, ErrRender(errors.New("Unexpected error")))
 		return
 	}
 
-	err := api.service.DeleteQuestion(r.Context(), *questionId)
+	err := api.service.DeleteQuestion(r.Context(), questionId)
 	if err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
 
 	render.Status(r, http.StatusOK)
+	if err := render.Render(w, r, &Question{}); err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
 }
 
 type ErrResponse struct {
@@ -139,33 +170,32 @@ func ErrRender(err error) render.Renderer {
 
 var ErrNotFound = &ErrResponse{HTTPStatusCode: 404, StatusText: "Resource not found."}
 
-func (*IndexedQuestion) Render(w http.ResponseWriter, r *http.Request) error {
+func (*Question) Render(w http.ResponseWriter, r *http.Request) error {
 	// Pre-processing before a response is marshalled and sent across the wire
 	return nil
 }
 
 type QuestionRequest struct {
-	*Question
+	*QuestionInformation `json:"information"`
+	QuestionDetails      `json:"details"`
 }
 
 func (qr *QuestionRequest) Bind(r *http.Request) error {
-	// a.Article is nil if no Article fields are sent in the request. Return an
-	// error to avoid a nil pointer dereference.
-	if qr.Question == nil {
+	if qr.QuestionInformation == nil {
 		return errors.New("missing required Question field.")
 	}
 
-	if qr.Question.Title == "" {
+	if qr.QuestionInformation.Title == "" {
 		return errors.New("missing required Question title field.")
 	}
 
 	return nil
 }
 
-func NewQuestionListResponse(questions []IndexedQuestion) []render.Renderer {
+func NewQuestionListResponse(questions []Question) []render.Renderer {
 	list := []render.Renderer{}
-	for _, question := range questions {
-		list = append(list, &question)
+	for i := range questions {
+		list = append(list, &questions[i])
 	}
 	return list
 }

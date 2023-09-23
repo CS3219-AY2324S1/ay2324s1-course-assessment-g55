@@ -1,23 +1,45 @@
 package main
 
-type Question struct {
-	Title       string   `json:"title"`
-	Description string   `json:"description"`
-	Complexity  Category `json:"complexity"`
-	Categories  []string `json:"categories"`
+import "time"
+
+type QuestionInformation struct {
+	Title      string     `json:"title"`
+	Complexity Complexity `json:"complexity"`
+	Categories []string   `json:"categories"`
+	Attempts   int        `json:"attempts"`
+	CreatedAt  time.Time  `json:"createdAt"`
 }
 
-type IndexedQuestion struct {
-	Id       QuestionId `json:"id"`
-	Question Question   `json:"question"`
+type QuestionDetails struct {
+	Description string `json:"description"`
+}
+
+type Question struct {
+	Id          QuestionId          `json:"id"`
+	Information QuestionInformation `json:"information"`
+	Details     QuestionDetails     `json:"details"`
+}
+
+type AwsQuestionDetail struct {
+	Id          QuestionId `dynamo:"questionId"`
+	Description string     `dynamo:"description"`
+}
+
+type PgQuestionInformation struct {
+	Id         QuestionId `db:"questionId"`
+	Title      string     `db:"questionTitle"`
+	Complexity Complexity `db:"difficulty"`
+	Categories []string   `db:"categories"`
+	Attempts   int        `db:"attempts"`
+	CreatedAt  time.Time  `db:"createdAt"`
 }
 
 type QuestionId uint64
 
-type Category int
+type Complexity string
 
 const (
-	Easy   Category = 0
-	Medium          = 1
-	Hard            = 2
+	Easy   Complexity = "easy"
+	Medium            = "medium"
+	Hard              = "hard"
 )
