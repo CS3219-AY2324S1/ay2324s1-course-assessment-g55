@@ -7,9 +7,9 @@ export interface QuestionType {
 }
 
 export const questions: Array<QuestionType> = [
-  { 
-    id: "1",
-    title: "Reverse a string",
+  {
+    id: '1',
+    title: 'Reverse a string',
     description: `Write a function that reverses a string. The input string is given as an array
 
 of characters s.
@@ -25,7 +25,7 @@ Output: ["h","a","n","n","a","H"]
 Constraints:
  1 <= s.length <= 105
  s[i] is a printable ascii character.`,
-    categories: ["Strings", "Algorithms"],
-    complexity: "Easy"
-  }
-]
+    categories: ['Strings', 'Algorithms'],
+    complexity: 'Easy',
+  },
+];
