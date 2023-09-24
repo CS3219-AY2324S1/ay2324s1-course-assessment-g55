@@ -2,6 +2,11 @@ import MonacoEditor from 'react-monaco-editor';
 import { Flex, Box, Card, CardBody, Button, Select } from '@chakra-ui/react';
 import { useState } from 'react';
 
+import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution';
+import 'monaco-editor/esm/vs/basic-languages/java/java.contribution';
+import 'monaco-editor/esm/vs/basic-languages/cpp/cpp.contribution';
+import 'monaco-editor/esm/vs/basic-languages/python/python.contribution';
+
 export function Editor() {
 
   const [selectedLanguage, setSelectedLanguage] = useState<string>('javascript'); // Default language
@@ -10,8 +15,7 @@ export function Editor() {
     { label: 'JavaScript', value: 'javascript' },
     { label: 'Python', value: 'python' },
     { label: 'Java', value: 'java' },
-    { label: 'C++', value: 'c++' },
-    { label: 'C', value: 'c' },
+    { label: 'C++', value: 'cpp' },
   ];
     
   const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
