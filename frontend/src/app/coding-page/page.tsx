@@ -10,7 +10,7 @@ export default function CodingPage() {
     <Flex>
       <Box w='40%'>
       <div style={{ height: '70%', overflowY: 'auto' }}>
-            <QuestionDisplay />
+            <QuestionDisplay id='1'/>
           </div>
           <div style={{ height: '30%', overflowY: 'auto' }}>
             <Chat />
