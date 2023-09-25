@@ -19,11 +19,6 @@ import (
 	"github.com/guregu/dynamo"
 )
 
-var qua = map[string]string{
-	"get":    "select * from questions where questionId=$1",
-	"getAll": "select * from questions",
-}
-
 func main() {
 
 	accessKey := os.Getenv("AWS_PREPPAL_PUBLIC_KEY")
@@ -63,7 +58,7 @@ func main() {
 	})
 	r.Route("/questions", func(r chi.Router) {
 		r.Post("/", server.CreateQuestion)
-		r.Get("/", server.ListQuestions) // GET /questions
+		r.Get("/", server.ListQuestions)
 		r.Route("/{questionId}", func(r chi.Router) {
 			r.Use(server.QuestionCtx)
 			r.Get("/", server.GetQuestion)
