@@ -24,7 +24,7 @@ func (api *ApiServer) QuestionCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		idInUrl, err := strconv.Atoi(chi.URLParam(r, "questionId"))
 		if err != nil {
-			render.Render(w, r, ErrNotFound)
+			render.Render(w, r, ErrInvalidRequest(errors.New("Question id must be a number")))
 			return
 		}
 		questionId := QuestionId(idInUrl)
@@ -52,7 +52,7 @@ func (api *ApiServer) GetQuestion(w http.ResponseWriter, r *http.Request) {
 	}
 	question, err := api.service.GetQuestion(r.Context(), questionId)
 	if err != nil {
-		render.Render(w, r, ErrNotFound)
+		render.Render(w, r, QuestionNotFound)
 		return
 	}
 	if err := render.Render(w, r, &question); err != nil {
@@ -74,7 +74,7 @@ func (api *ApiServer) CreateQuestion(w http.ResponseWriter, r *http.Request) {
 
 	questionId, err := api.service.CreateQuestion(r.Context(), question)
 	if err != nil {
-		render.Render(w, r, ErrRender(err))
+		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
 	question.Id = questionId
@@ -102,13 +102,13 @@ func (api *ApiServer) UpdateQuestion(w http.ResponseWriter, r *http.Request) {
 		Details:     data.QuestionDetails,
 	}
 	if err := api.service.UpdateQuestion(r.Context(), question); err != nil {
-		render.Render(w, r, ErrRender(err))
+		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
 
 	render.Status(r, http.StatusOK)
 	if err := render.Render(w, r, &question); err != nil {
-		render.Render(w, r, ErrRender(err))
+		render.Render(w, r, Success("Question updated"))
 		return
 	}
 }
@@ -116,21 +116,26 @@ func (api *ApiServer) UpdateQuestion(w http.ResponseWriter, r *http.Request) {
 func (api *ApiServer) DeleteQuestion(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	questionId, ok := ctx.Value("questionId").(QuestionId)
-	println(questionId)
+
+	_, err := api.service.GetQuestion(r.Context(), questionId)
+	if err != nil {
+		render.Render(w, r, QuestionNotFound)
+		return
+	}
 
 	if !ok {
 		render.Render(w, r, ErrRender(errors.New("Unexpected error")))
 		return
 	}
 
-	err := api.service.DeleteQuestion(r.Context(), questionId)
+	err = api.service.DeleteQuestion(r.Context(), questionId)
 	if err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
 
 	render.Status(r, http.StatusOK)
-	if err := render.Render(w, r, &Question{}); err != nil {
+	if err := render.Render(w, r, Success("Question deleted")); err != nil {
 		render.Render(w, r, ErrRender(err))
 		return
 	}
@@ -147,6 +152,17 @@ type ErrResponse struct {
 
 func (e *ErrResponse) Render(w http.ResponseWriter, r *http.Request) error {
 	render.Status(r, e.HTTPStatusCode)
+	return nil
+}
+
+type SuccessResponse struct {
+	HTTPStatusCode int `json:"-"` // http response status code
+
+	StatusText string `json:"status"` // user-level status message
+}
+
+func (s *SuccessResponse) Render(w http.ResponseWriter, r *http.Request) error {
+	render.Status(r, s.HTTPStatusCode)
 	return nil
 }
 
@@ -168,7 +184,18 @@ func ErrRender(err error) render.Renderer {
 	}
 }
 
-var ErrNotFound = &ErrResponse{HTTPStatusCode: 404, StatusText: "Resource not found."}
+func ErrNotFound(statusText string) render.Renderer {
+	return &ErrResponse{HTTPStatusCode: 404, StatusText: statusText}
+}
+
+var QuestionNotFound = ErrNotFound("Question does not exist")
+
+func Success(statusText string) render.Renderer {
+	return &SuccessResponse{
+		HTTPStatusCode: http.StatusOK,
+		StatusText:     statusText,
+	}
+}
 
 func (*Question) Render(w http.ResponseWriter, r *http.Request) error {
 	// Pre-processing before a response is marshalled and sent across the wire
