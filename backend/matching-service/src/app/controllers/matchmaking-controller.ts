@@ -1,12 +1,7 @@
 import { Request, Response } from 'express';
+import RabbitMQService from '../../message-queue/rabbitmq'; // Import the RabbitMQ service
 
 class MatchmakingController {
-  // Simulated matchmaking queue (in-memory array)
-  private matchmakingQueue: string[] = [];
-
-  // Simulated matches (in-memory array)
-  private matches: { matchId: string; users: string[] }[] = [];
-
   // Add a user to the matchmaking queue
   addToQueue(req: Request, res: Response): void {
     const userId: string = req.body.userId;
@@ -16,42 +11,31 @@ class MatchmakingController {
       return;
     }
 
-    this.matchmakingQueue.push(userId);
+    const difficulty: string = req.body.difficulty || 'easy'; // Default to 'easy' if difficulty is not provided
+
+    // Publish a message to the corresponding RabbitMQ queue
+    RabbitMQService.publishMessage(difficulty, JSON.stringify({ userId }));
+
     res.status(200).json({ message: 'User added to the matchmaking queue.' });
   }
 
   // Create matches from users in the matchmaking queue
   createMatch(req: Request, res: Response): void {
-    if (this.matchmakingQueue.length < 2) {
-      res.status(400).json({ message: 'Insufficient users in the queue to create a match.' });
-      return;
-    }
+    // Matchmaking logic using RabbitMQ should be handled asynchronously through message consumption
+    // Instead of creating a match directly here, you'll listen for match messages from RabbitMQ
 
-    // Take the first two users from the queue to create a match
-    const users = this.matchmakingQueue.splice(0, 2);
-    const matchId = `match_${Date.now()}`;
-
-    this.matches.push({ matchId, users });
-    res.status(201).json({ message: 'Match created.', matchId });
+    res.status(202).json({ message: 'Match creation request accepted.' });
   }
 
-  // Get matches for a specific user
-  getMatchesForUser(req: Request, res: Response, userId: string): void {
-    const userMatches = this.matches.filter((match) => match.users.includes(userId));
-    res.status(200).json({ matches: userMatches });
-  }
-
-  // Delete a match by its ID
-  deleteMatch(req: Request, res: Response, matchId: string): void {
-    const matchIndex = this.matches.findIndex((match) => match.matchId === matchId);
-
-    if (matchIndex === -1) {
-      res.status(404).json({ message: 'Match not found.' });
-      return;
-    }
-
-    this.matches.splice(matchIndex, 1);
-    res.status(200).json({ message: 'Match deleted.' });
+  // Initialize RabbitMQ when the server starts
+  initializeRabbitMQ(): void {
+    RabbitMQService.initialize()
+      .then(() => {
+        // Add RabbitMQ initialization success handling if needed
+      })
+      .catch((error) => {
+        console.error('Error initializing RabbitMQ:', error.message);
+      });
   }
 }
 

@@ -1,5 +1,9 @@
 import * as amqp from 'amqplib';
 
+require('dotenv').config(); // Load environment variables from .env
+
+const rabbitmqUrl = process.env.RABBITMQ_URL;
+
 class RabbitMQService {
   private connection: amqp.Connection | null = null;
   private channel: amqp.Channel | null = null;
@@ -7,8 +11,10 @@ class RabbitMQService {
   async initialize() {
     try {
       // Connect to RabbitMQ server
-      this.connection = await amqp.connect('amqp://localhost'); // Replace with your RabbitMQ server URL
-
+      if (rabbitmqUrl===undefined) {
+          throw new Error(  'RABBITMQ_URL is not defined in the .env file.')
+        }
+        this.connection = await amqp.connect(rabbitmqUrl);
       // Create a channel
       this.channel = await this.connection.createChannel();
 

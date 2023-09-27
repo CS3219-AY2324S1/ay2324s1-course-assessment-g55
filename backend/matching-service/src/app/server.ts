@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import routes from './routes/matchmaking'; // Import your matchmaking routes here
+import rabbitmq from '../message-queue/rabbitmq';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -19,6 +20,12 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     res.status(500).json({ error: 'Something went wrong!' });
   });
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+// Initialize RabbitMQ (await here if needed)
+(async () => {
+await rabbitmq.initialize();
+
+  // Start the Express server
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
+})();
