@@ -17,22 +17,27 @@ import {
   Tr,
   useDisclosure,
 } from '@chakra-ui/react';
+import { useDeleteQuestion } from './api';
 
 function QuestionRow(props: {
-  rowNum: number;
   question: QuestionType;
   deleteQuestion: (idx: number) => void;
 }) {
-  const { rowNum, question, deleteQuestion } = props;
+  const { question, deleteQuestion } = props;
   const { isOpen, onOpen, onClose } = useDisclosure();
+
   const row = (
     <Tr>
       <Td>
-        <Button onClick={onOpen}>{question.title}</Button>
+        <Button onClick={onOpen}>{question.information.title}</Button>
       </Td>
-      <Td>{question.complexity}</Td>
+      <Td>{question.information.complexity}</Td>
       <Td>
-        <Button size='sm' color='red' onClick={() => deleteQuestion(rowNum)}>
+        <Button
+          size='sm'
+          color='red'
+          onClick={() => deleteQuestion(question.id)}
+        >
           <DeleteIcon />
         </Button>
       </Td>
@@ -45,11 +50,10 @@ function QuestionRow(props: {
     </>
   );
 }
-export function QuestionList(props: {
-  questions: QuestionType[];
-  deleteQuestion: (row: number) => void;
-}) {
-  const { questions, deleteQuestion } = props;
+export function QuestionList(props: { questions: QuestionType[] }) {
+  const { questions } = props;
+
+  const { mutate: deleteQuestionMutation } = useDeleteQuestion();
 
   return (
     <TableContainer>
@@ -66,8 +70,7 @@ export function QuestionList(props: {
             <QuestionRow
               key={`question-${rowNum}`}
               question={question}
-              rowNum={rowNum}
-              deleteQuestion={deleteQuestion}
+              deleteQuestion={deleteQuestionMutation}
             />
           ))}
         </Tbody>
@@ -89,21 +92,21 @@ function QuestionItem(props: {
         <ModalContent>
           <ModalHeader>
             {' '}
-            {question.id}. {question.title}{' '}
+            {question.id}. {question.information.title}{' '}
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <div> Difficulty: {question.complexity} </div>
+            <div> Difficulty: {question.information.complexity} </div>
 
             <div className='whitespace-pre-line py-3'>
               <h2>Description</h2>
-              <p>{question.description}</p>
+              <p>{question.details.description}</p>
             </div>
             <div>
               {' '}
-              {question.categories.length == 0
+              {question.information.categories.length == 0
                 ? 'No categories!'
-                : `Categories: ${question.categories.reduce(
+                : `Categories: ${question.information.categories.reduce(
                     (acc, c) => acc + ', ' + c
                   )}`}
             </div>
