@@ -1,10 +1,6 @@
 import { QuestionSchema, QuestionType } from '@/data/question';
 import axios from 'axios';
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 
 const QUERY_KEY = 'questions';
@@ -26,18 +22,15 @@ const getQuestions = async () => {
 
 const getQuestion = async (questionId: number) => {
   const { data } = await questionApi.get(`/questions/${questionId}`);
-  return QuestionSchema.safeParse(data);
+  return QuestionSchema.parse(data);
 };
 
 const createQuestion = async (question: QuestionType) => {
-  try {
-    const { data } = await questionApi.post('/questions/', question, {
-      headers: HEADERS,
-    });
-    return data;
-  } catch (e) {
-    console.log(e);
-  }
+  const { data } = await questionApi.post('/questions/', question, {
+    headers: HEADERS,
+  });
+  console.log(data)
+  return successResponseSchema.parse(data);
 };
 
 const deleteQuestion = async (questionId: number) => {
