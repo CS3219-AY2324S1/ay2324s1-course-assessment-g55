@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -77,9 +78,8 @@ func (api *ApiServer) CreateQuestion(w http.ResponseWriter, r *http.Request) {
 		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-	question.Id = questionId
 	render.Status(r, http.StatusCreated)
-	if err := render.Render(w, r, &question); err != nil {
+	if err := render.Render(w, r, Success(fmt.Sprintf("Question with id %d created", questionId))); err != nil {
 		render.Render(w, r, ErrRender(err))
 		return
 	}
