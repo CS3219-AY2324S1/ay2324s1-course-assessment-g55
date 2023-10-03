@@ -10,9 +10,9 @@ router.post('/queue', (req, res) => {
   matchmakingController.addToQueue(req, res);
 });
 
-router.post('/matches', (req, res) => {
-  // Handle creating matches
-  matchmakingController.createMatch(req, res);
+router.delete('/queue', (req, res) => {
+  // Handle matchmaking queue request
+  matchmakingController.removeFromQueue(req, res);
 });
 
 export default router;

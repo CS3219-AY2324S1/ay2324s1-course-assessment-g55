@@ -16,13 +16,13 @@ app.use('/api/matchmaking', routes); // Mount your matchmaking routes
 
 // Error handler middleware (You can create your own error-handler.ts)
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    console.error(err.stack);
-    res.status(500).json({ error: 'Something went wrong!' });
-  });
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something went wrong!' });
+});
 
 // Initialize RabbitMQ (await here if needed)
 (async () => {
-await rabbitmq.initialize();
+  await rabbitmq.initialize();
 
   // Start the Express server
   app.listen(port, () => {

@@ -37,6 +37,30 @@ class RabbitMQService {
     }
   }
 
+  async removeUserFromQueue(queue: string, userId: string) {
+    if (!this.channel) {
+      console.error('RabbitMQ channel not initialized');
+      return;
+    }
+
+    try {
+      for (const consumerTag in this.consumers) {
+        if (this.consumers[consumerTag] === userId) {
+          await this.channel.cancel(consumerTag);
+          console.log(`User ${userId} removed from queue`);
+          // Remove the user from the consumers object
+          delete this.consumers[consumerTag];
+        }
+      }
+    } catch (error: any) {
+      console.error(
+        `Error removing user ${userId} from queue "${queue}":`,
+        error.message
+      );
+    }
+  }
+
+
   async publishMessage(queue: string, message: string) {
     if (!this.channel) {
       console.error('RabbitMQ channel not initialized');
