@@ -37,7 +37,7 @@ const updateUser = async (req, res) => {
 
   // validate request body
   if (!email & !name) {
-      return res.status(400).json({ message: 'Please enter all fields.' })
+      return res.status(400).json({ message: 'Please enter a field.' })
   }
 
   try {
