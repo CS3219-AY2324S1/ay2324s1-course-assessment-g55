@@ -8,20 +8,24 @@ const fetchAllUsers = async (req, res) => {
 }
 
 const createUser = async (req, res) => {
-  const { email } = req.body
+  const { email, name } = req.body
 
   // validate request body
-  if (!email) {
+  if (!email || !name) {
       return res.status(400).json({ message: 'Please enter all fields.' })
   }
 
   try {
     const user = await prisma.user.create({
-      email
+      data: {
+        email,
+        name
+      }
     })
     res.json({
       _id: user._id,
       email: user.email,
+      name: user.name
     })
   } catch (error) {
     res.status(400).json({ message: 'Invalid user data.' })
@@ -32,14 +36,14 @@ const updateUser = async (req, res) => {
   const { email, name } = req.body
 
   // validate request body
-  if (!email || !name) {
+  if (!email & !name) {
       return res.status(400).json({ message: 'Please enter all fields.' })
   }
 
   try {
     const user = await prisma.user.findUnique({
       where: {
-        id: req.params.id,
+        id: parseInt(req.params.id),
       },
     });
 
@@ -49,7 +53,7 @@ const updateUser = async (req, res) => {
   
     const updatedUser = await prisma.user.update({
       where: {
-        id: req.params.id,
+        id: parseInt(req.params.id),
       },
       data: {
         email: email,
@@ -76,3 +80,5 @@ const deleteUser = async (req, res) => {
       res.status(404).json({ message: 'User not found' });
   }
 }
+
+module.exports = { fetchAllUsers, createUser, updateUser, deleteUser }
