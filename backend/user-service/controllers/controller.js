@@ -7,6 +7,16 @@ const fetchAllUsers = async (req, res) => {
   res.status(200).json(users)
 }
 
+const getUser = async (req, res) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: parseInt(req.params.id),
+    }
+  })
+  
+  res.status(200).json(user)
+}
+
 const createUser = async (req, res) => {
   const { email, name } = req.body
 
@@ -81,4 +91,4 @@ const deleteUser = async (req, res) => {
   }
 }
 
-module.exports = { fetchAllUsers, createUser, updateUser, deleteUser }
+module.exports = { fetchAllUsers, getUser, createUser, updateUser, deleteUser }

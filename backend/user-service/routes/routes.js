@@ -1,10 +1,14 @@
 const express = require('express')
 const router = express.Router()
-const { fetchAllUsers, createUser, updateUser, deleteUser } = require('../controllers/controller')
+const { fetchAllUsers, getUser, createUser, updateUser, deleteUser } = require('../controllers/controller')
 
 // call the fetchAllUsers function
 // when a GET request is made
 router.route('/').get(fetchAllUsers)
+
+// call the getUser function
+// when a GET request is made
+router.route('/:id').get(getUser)
 
 // call the createUser function
 // when a POST request is made
