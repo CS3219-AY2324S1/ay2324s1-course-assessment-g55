@@ -18,24 +18,26 @@ const getUser = async (req, res) => {
 }
 
 const createUser = async (req, res) => {
-  const { email, name } = req.body
+  const { email, firstname, lastname } = req.body
 
   // validate request body
-  if (!email || !name) {
-      return res.status(400).json({ message: 'Please enter all fields.' })
+  if (!email || !firstname) {
+      return res.status(400).json({ message: 'Please enter all required fields.' })
   }
 
   try {
     const user = await prisma.user.create({
       data: {
         email,
-        name
+        firstname,
+        lastname: lastname || null
       }
     })
     res.json({
       _id: user._id,
       email: user.email,
-      name: user.name
+      firstname: user.firstname,
+      lastname: user.lastname
     })
   } catch (error) {
     res.status(400).json({ message: 'Invalid user data.' })
@@ -43,10 +45,10 @@ const createUser = async (req, res) => {
 }
 
 const updateUser = async (req, res) => {
-  const { email, name } = req.body
+  const { email, firstname, lastname, bio } = req.body
 
   // validate request body
-  if (!email & !name) {
+  if (!email & !firstname & !lastname & !bio) {
       return res.status(400).json({ message: 'Please enter a field.' })
   }
 
@@ -61,15 +63,31 @@ const updateUser = async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
   
+    const updatedData = {};
+
+    if (email) {
+      updatedData.email = email;
+    }
+
+    if (firstname) {
+      updatedData.firstname = firstname;
+    }
+
+    if (lastname) {
+      updatedData.lastname = lastname;
+    }
+
+    if (bio) {
+      updatedData.bio = bio;
+    }
+
     const updatedUser = await prisma.user.update({
       where: {
         id: parseInt(req.params.id),
       },
-      data: {
-        email: email,
-        name: name,
-      },
+      data: updatedData,
     });
+
     res.status(200).json(updatedUser);
   } catch (error) {
     console.error(error);
