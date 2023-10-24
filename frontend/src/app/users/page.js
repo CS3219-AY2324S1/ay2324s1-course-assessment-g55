@@ -1,8 +1,10 @@
 'use client'
 
 import UserCard from './user-card'
+import Link from "next/link";
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import { SimpleGrid, Box } from "@chakra-ui/react";
 
 const UserList = () => {
   const [users, setUsers] = useState([])
@@ -23,12 +25,20 @@ const UserList = () => {
   }, [users])
 
   return (
-    <div className="flex-1 max-w-3xl">
-      {users.map((user) => (
-        <UserCard key={user.id} user={user} />
-      ))}
-    </div>
-  )
+    <SimpleGrid columns={[1, 2, 3, 4]} spacing={4} p={8}>
+      {users.length > 0 ? (
+        users.map((user) => (
+          <Link key={user.id} href={`/users/${user.id}`}>
+            <UserCard key={user.id} user={user} p={4} />
+          </Link>
+        ))
+      ) : (
+        <Box p={4} textAlign="center">
+          No users found.
+        </Box>
+      )}
+    </SimpleGrid>
+  );
 }
 
 export default UserList

@@ -1,20 +1,37 @@
 'use client'
 
 import { useState } from 'react';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import {
+  Box,
+  FormControl,
+  FormLabel,
+  Input,
+  Button,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  Heading,
+  useToast
+} from "@chakra-ui/react";
 
 const LoginPage = () => {
+  const router = useRouter()
+  const toast = useToast();
 
-  const [formData, setFormData] = useState({
+  const [registerData, setRegisterData] = useState({
     email: '',
-    name: '',
+    firstname: '',
+    lastname: '',
   });
 
-  const handleInputChange = (e) => {
+  const handleRegisterInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setRegisterData({
+      ...registerData,
       [name]: value,
     });
   };
@@ -22,53 +39,114 @@ const LoginPage = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8080/api/users', formData)
+      const response = await axios.post('http://localhost:8080/api/users', registerData)
 
-      setFormData({
+      setRegisterData({
         email: '',
-        name: '',
+        firstname: '',
+        lastname: '',
       });
 
-      if (response.ok) {
-        redirect("/user-list")
+      if (response.status >= 200 && response.status < 300) {
+        router.push("/users")
       }
 
     } catch (error) {
       console.error('Error creating user:', error)
+
+      toast({
+        title: "Error",
+        description: "Failed to create a user. Please try again.",
+        status: "error",
+        duration: 5000, // Display the toast for 5 seconds
+        isClosable: true,
+      });
     }
   }
 
   return (
-    <div>
-      <h2>Peerprep</h2>
-      <form onSubmit={handleRegister} className="w-2/3 space-y-6">
-        <label>Email:
-        <input 
-          type="text" 
-          name="email"
-          value={formData.email}
-          onChange={handleInputChange}
-        />
-        </label>
-        <label>Name:
-          <input 
-            type="text" 
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-          />
-        </label>
-        <button
-          className="flex items-center text-white transition ease-in-out delay-50 bg-gray-900 hover:scale-105 hover:bg-gray-800 duration-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2"
-          onClick={() => {
-            console.log('clicked')
-          }}
-          type="submit"
-        >
-          Create User
-        </button>
-      </form>
-    </div>
+    <Box width="400px" margin="20">
+      <Heading as="h2" size="xl" mb={4}>
+        Peerprep
+      </Heading>
+      <Tabs>
+        <TabList>
+          <Tab>Login</Tab>
+          <Tab>Register</Tab>
+        </TabList>
+
+        <TabPanels>
+          <TabPanel>
+          <form onSubmit={handleRegister}>
+              <FormControl id="registerFirstname" isRequired>
+                <FormLabel>Firstname</FormLabel>
+                <Input
+                  type="text"
+                  name="firstname"
+                  value={registerData.firstname}
+                  onChange={handleRegisterInputChange}
+                />
+              </FormControl>
+              <FormControl id="registerLastname">
+                <FormLabel>Lastname</FormLabel>
+                <Input
+                  type="text"
+                  name="lastname"
+                  value={registerData.lastname}
+                  onChange={handleRegisterInputChange}
+                />
+              </FormControl>
+              <FormControl id="registerEmail" isRequired>
+                <FormLabel>Email Address</FormLabel>
+                <Input
+                  type="email"
+                  name="email"
+                  value={registerData.email}
+                  onChange={handleRegisterInputChange}
+                />
+              </FormControl>
+              <Button type="submit" mt={4} colorScheme="green">
+                Login
+              </Button>
+            </form>
+          </TabPanel>
+          <TabPanel>
+            <form onSubmit={handleRegister}>
+            <FormControl id="registerName" isRequired>
+                <FormLabel>Firstname</FormLabel>
+                <Input
+                  type="text"
+                  name="firstname"
+                  value={registerData.firstname}
+                  onChange={handleRegisterInputChange}
+                />
+              </FormControl>
+              <FormControl id="registerName">
+                <FormLabel>Lastname</FormLabel>
+                <Input
+                  type="text"
+                  name="lastname"
+                  value={registerData.lastname}
+                  onChange={handleRegisterInputChange}
+                />
+              </FormControl>
+              <FormControl id="registerEmail" isRequired>
+                <FormLabel>Email Address</FormLabel>
+                <Input
+                  type="email"
+                  name="email"
+                  value={registerData.email}
+                  onChange={handleRegisterInputChange}
+                />
+              </FormControl>
+              <Button type="submit" mt={4} colorScheme="green">
+                Register
+              </Button>
+            </form>
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    </Box>
   );
 }
 
