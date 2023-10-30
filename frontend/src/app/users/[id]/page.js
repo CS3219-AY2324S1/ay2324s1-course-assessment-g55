@@ -113,7 +113,7 @@ const UserProfile = ({ params }) => {
             <Avatar name={profile.firstname + (profile.lastname || '')} size="xl" mb={4} />
             <VStack align="start" spacing={3}>
               <Heading as="h2" size="lg">
-                {profile.firstname + (profile.lastname || '')}
+                {profile.firstname + ' ' + (profile.lastname || '')}
               </Heading>
               <Text>
                 id: {profile.id}
