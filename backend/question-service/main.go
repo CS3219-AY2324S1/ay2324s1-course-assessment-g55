@@ -19,6 +19,23 @@ import (
 	"github.com/guregu/dynamo"
 )
 
+func CORS(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        w.Header().Add("Access-Control-Allow-Origin", "*")
+        w.Header().Add("Access-Control-Allow-Credentials", "true")
+        w.Header().Add("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+        w.Header().Add("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+
+        if r.Method == "OPTIONS" {
+            http.Error(w, "No Content", http.StatusNoContent)
+            return
+        }
+
+        next.ServeHTTP(w, r)
+    })
+}
+
+
 func main() {
 
 	accessKey := os.Getenv("AWS_PREPPAL_PUBLIC_KEY")
@@ -42,6 +59,7 @@ func main() {
 
 	r := chi.NewRouter()
 
+	r.Use(CORS)
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)

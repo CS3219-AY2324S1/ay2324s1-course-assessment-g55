@@ -1,4 +1,6 @@
 # Stores VSCode versions used for testing VSCode extensions
+**/.env
+
 .vscode-test
 .vscode
 .env
