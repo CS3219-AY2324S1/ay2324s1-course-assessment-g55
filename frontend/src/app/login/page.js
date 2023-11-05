@@ -77,6 +77,8 @@ const LoginPage = () => {
 
         <TabPanels>
           <TabPanel>
+            <p>To be coming...</p>
+          {/*
           <form onSubmit={handleRegister}>
               <FormControl id="registerFirstname" isRequired>
                 <FormLabel>Firstname</FormLabel>
@@ -109,7 +111,8 @@ const LoginPage = () => {
                 Login
               </Button>
             </form>
-          </TabPanel>
+            */}
+          </TabPanel> 
           <TabPanel>
             <form onSubmit={handleRegister}>
             <FormControl id="registerName" isRequired>
