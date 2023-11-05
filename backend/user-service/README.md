@@ -12,6 +12,12 @@ Run `npm i` to install the required node modules
 #### Run
 Run `npm run dev` to start user-service
 
+#### Clear and repopulate the database:
+```bash
+node scripts/populateDb.js
+
+```
+
 ### API endpoints
 
 1. List All Users

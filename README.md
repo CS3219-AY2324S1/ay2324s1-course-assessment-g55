@@ -18,6 +18,7 @@ Go to `backend` folder
 Go to `frontend` folder
 
 - Run `npm i` to install the required node modules.
+- Run `npm install @chakra-ui/react @chakra-ui/core @emotion/react @emotion/styled framer-motion` to install the quired Chakra UI modules.
 
 ## Development
 
