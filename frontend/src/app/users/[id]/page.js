@@ -23,6 +23,14 @@ const UserProfile = ({ params }) => {
       setIsEditing(false);
     } catch (error) {
       console.error('Error updating user profile:', error);
+
+      toast({
+        title: "Error",
+        description: "Failed to update user profile. Please try again.",
+        status: "error",
+        duration: 5000, // Display the toast for 5 seconds
+        isClosable: true,
+      });
     }
   };
 
