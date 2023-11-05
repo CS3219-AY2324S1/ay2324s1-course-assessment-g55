@@ -1,0 +1,83 @@
+[
+    {
+      "id": 1,
+      "email": "john.doe@example.com",
+      "firstname": "John",
+      "lastname": "Doe",
+      "bio": "This is John's bio.",
+      "score": 50
+    },
+    {
+      "id": 2,
+      "email": "jane.smith@example.com",
+      "firstname": "Jane",
+      "lastname": "Smith",
+      "bio": "This is Jane's bio.",
+      "score": 75
+    },
+    {
+      "id": 3,
+      "email": "bob.johnson@example.com",
+      "firstname": "Bob",
+      "lastname": "Johnson",
+      "bio": "This is Bob's bio.",
+      "score": 60
+    },
+    {
+      "id": 4,
+      "email": "susan.wilson@example.com",
+      "firstname": "Susan",
+      "lastname": "Wilson",
+      "bio": "This is Susan's bio.",
+      "score": 80
+    },
+    {
+      "id": 5,
+      "email": "michael.brown@example.com",
+      "firstname": "Michael",
+      "lastname": "Brown",
+      "bio": "This is Michael's bio.",
+      "score": 70
+    },
+    {
+      "id": 6,
+      "email": "emily.white@example.com",
+      "firstname": "Emily",
+      "lastname": "White",
+      "bio": "This is Emily's bio.",
+      "score": 65
+    },
+    {
+      "id": 7,
+      "email": "william.taylor@example.com",
+      "firstname": "William",
+      "lastname": "Taylor",
+      "bio": "This is William's bio.",
+      "score": 55
+    },
+    {
+      "id": 8,
+      "email": "sophia.anderson@example.com",
+      "firstname": "Sophia",
+      "lastname": "Anderson",
+      "bio": "This is Sophia's bio.",
+      "score": 90
+    },
+    {
+      "id": 9,
+      "email": "david.miller@example.com",
+      "firstname": "David",
+      "lastname": "Miller",
+      "bio": "This is David's bio.",
+      "score": 45
+    },
+    {
+      "id": 10,
+      "email": "olivia.harris@example.com",
+      "firstname": "Olivia",
+      "lastname": "Harris",
+      "bio": "This is Olivia's bio.",
+      "score": 85
+    }
+  ]
+  
