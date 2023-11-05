@@ -18,6 +18,13 @@ docker build -t question-service .
 docker run -d -p 4444:3333 --env-file .env question-service     # 4444 is port on host, 3333 is port on docker
 
 ```
+#### Clear and repopulate the database:
+```bash
+python seed.py
+python run-sql.py
+
+```
+
 ### API endpoints
 
 1. List Questions
