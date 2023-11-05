@@ -1,6 +1,6 @@
 'use client'
 
-import { Avatar, Box, Heading, Text, Button, VStack, FormControl, FormLabel, Input, Spinner } from '@chakra-ui/react';
+import { Avatar, Box, Heading, Text, Button, VStack, FormControl, FormLabel, Input, Spinner, useToast } from '@chakra-ui/react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -8,6 +8,7 @@ const UserProfile = ({ params }) => {
   const [profile, setProfile] = useState([])
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const toast = useToast();
 
   const handleEditClick = () => {
     setIsEditing(true);
@@ -84,7 +85,7 @@ const UserProfile = ({ params }) => {
               onChange={(e) => setProfile({ ...profile, firstname: e.target.value })}
             />
           </FormControl>
-          <FormControl id="editLastname">
+          <FormControl id="editLastname" mt={4}>
             <FormLabel>Lastname</FormLabel>
             <Input
               type="text"
@@ -93,16 +94,11 @@ const UserProfile = ({ params }) => {
               onChange={(e) => setProfile({ ...profile, lastname: e.target.value })}
             />
           </FormControl>
-          <FormControl id="editEmail" isRequired>
+          <FormControl id="editEmail" mt={4} isRequired>
             <FormLabel>Email</FormLabel>
-            <Input
-              type="email"
-              name="email"
-              value={profile.email}
-              onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-            />
+            <Text>{profile.email}</Text>
           </FormControl>
-          <FormControl id="editBio">
+          <FormControl id="editBio" mt={4}>
             <FormLabel>Bio</FormLabel>
             <Input
               type="text"
